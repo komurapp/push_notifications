@@ -1,4 +1,6 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 void main() => runApp(MyApp());
 
@@ -21,6 +23,33 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+  @override
+  void initState() {
+    super.initState();
+
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    const AndroidInitializationSettings android =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    const IOSInitializationSettings ios = IOSInitializationSettings();
+    const InitializationSettings initSettings =
+        InitializationSettings(android, ios);
+
+    flutterLocalNotificationsPlugin.initialize(initSettings,
+        onSelectNotification: onSelectNotification);
+  }
+
+  Future<dynamic> onSelectNotification(String payload) async {
+    showDialog<dynamic>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Title inside dialog'),
+        content: Text('$payload'),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,8 +57,31 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Flutter Local Notification'),
       ),
       body: Center(
-        child: const Text('Demo'),
+        child: RaisedButton(
+          onPressed: showNotification,
+          child: const Text('Demo'),
+        ),
       ),
+    );
+  }
+
+  Future<dynamic> showNotification() async {
+    final int id = Random.secure().nextInt(100);
+    final AndroidNotificationDetails android = AndroidNotificationDetails(
+      'Channel Id',
+      'Channel Name',
+      'Channel Description',
+      importance: Importance.Max,
+      priority: Priority.High,
+    );
+    final IOSNotificationDetails ios = IOSNotificationDetails();
+    final NotificationDetails platform = NotificationDetails(android, ios);
+    await flutterLocalNotificationsPlugin.show(
+      id,
+      'Title',
+      'Body of notification with id: $id',
+      platform,
+      payload: '$id',
     );
   }
 }
