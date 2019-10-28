@@ -52,20 +52,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    const int delay = 3;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutter Local Notification'),
       ),
       body: Center(
         child: RaisedButton(
-          onPressed: showNotification,
-          child: const Text('Demo'),
+          onPressed: () => showNotification(delay),
+          child: const Text('Show notification after $delay seconds'),
         ),
       ),
     );
   }
 
-  Future<dynamic> showNotification() async {
+  Future<dynamic> showNotification(int delay) async {
     final int id = Random.secure().nextInt(100);
     final AndroidNotificationDetails android = AndroidNotificationDetails(
       'Channel Id',
@@ -76,6 +77,8 @@ class _MyHomePageState extends State<MyHomePage> {
     );
     final IOSNotificationDetails ios = IOSNotificationDetails();
     final NotificationDetails platform = NotificationDetails(android, ios);
+
+    await Future<dynamic>.delayed(Duration(seconds: delay));
     await flutterLocalNotificationsPlugin.show(
       id,
       'Title',
